@@ -1,14 +1,18 @@
 exports.initialize = function() {
     var myExports = {
+        'live_set': null,
         'clip_slot_grid': [],
         'recorded_clip_array': [],
         'scene_array': [],
         'scene_name_lookup_array': [],
         'track_array': [],
-        'track_name_lookup_array': []
+        'track_name_lookup_array': [],
+        'device_array': []
     };
 
     var root = new LiveAPI(this.patcher, "live_set");
+    myExports.live_set = root;
+
     var num_scenes = root.getcount("scenes");
     var num_tracks = root.getcount("tracks");
 

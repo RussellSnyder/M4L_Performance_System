@@ -32,7 +32,17 @@ var sections = {
                         }
                     ]
                 }
-            ]
+            ],
+            set: {
+                quantization: 0,
+                time: 0,
+                play: 1,
+                groove_amount: 0,
+                overdub: 0,
+                record: 1,
+                tempo: 315,
+                signature: [7, 8]
+            }
         }
     },
 
@@ -65,7 +75,17 @@ var sections = {
                 //     name: 'track two',
                 //     solo: 1
                 // }
-            ]
+            ],
+            set: {
+                quantization: 4,
+                time: 4,
+                play: 0,
+                groove_amount: 0,
+                overdub: 0,
+                record: 0,
+                tempo: 215,
+                signature: [3, 4]
+            }
         }
     },
 

@@ -1,3 +1,62 @@
+exports.getAbeltonGlobalEvents = function (triggers) {
+    var globalAbeltonEventsToTrigger = [];
+
+    if (!triggers.set) {
+        return globalAbeltonEventsToTrigger
+    }
+
+    Object.keys(triggers.set).forEach(function(param) {
+        var value = triggers.set[param];
+        globalAbeltonEventsToTrigger.push(convertToLOMNotation(param, value))
+    });
+
+    return globalAbeltonEventsToTrigger;
+
+};
+
+/**
+ *
+ * @param param
+ * @param value
+ * @returns {object}
+ */
+var convertToLOMNotation = function(param, value) {
+    var alreadyFormatted = ['overdub', 'groove_amount', 'tempo'];
+    if (alreadyFormatted.indexOf(param) !== -1) {
+        var obj = {};
+        obj[param] = value;
+        return obj;
+    }
+    if (param == 'quantization') {
+        return {clip_trigger_quantization: value}
+    }
+    if (param == 'time') {
+        return {current_song_time: value}
+    }
+    if (param == 'play') {
+        return {is_playing: value}
+    }
+    if (param == 'record') {
+        return {record_mode: value}
+    }
+    if (param == 'signature') {
+        return {
+            signature_numerator: value[1],
+            signature_denominator: value[1]
+        }
+    }
+
+    post('unknown Abelton Event:', param, 'with value', value);
+    return {};
+
+};
+
+/**
+ *
+ * @param triggers
+ * @param SCENE_NAME_LOOKUP_ARRAY
+ * @returns {int|null}
+ */
 exports.getSceneToFire = function (triggers, SCENE_NAME_LOOKUP_ARRAY) {
     if (!triggers.scene) {
         return null
