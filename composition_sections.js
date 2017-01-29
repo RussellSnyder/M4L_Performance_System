@@ -35,11 +35,11 @@ var sections = {
             ],
             set: {
                 quantization: 0,
-                time: 0,
-                play: 1,
+                time: 5.3,
+                // play: 1,
                 groove_amount: 0,
                 overdub: 0,
-                record: 1,
+                // record: 1,
                 tempo: 315,
                 signature: [7, 8]
             }

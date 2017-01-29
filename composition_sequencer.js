@@ -53,7 +53,6 @@ function step(direction) {
     var tempIndex = currentStepIndex;
 
     if (tempIndex + direction < 0) {
-        post('here');
         return;
     } else if (tempIndex + direction > LAST_INDEX_OF_COMPOSITION) {
         return;
@@ -88,11 +87,6 @@ function triggerStepInComposition(direction) {
     fireScene(sceneToFire);
     stopClips(clipsToStopCoords);
     fireClips(clipsToFireCoords);
-    // post('\n', triggers[0].name);
-    // post('\n', clip.x);
-    // post('\n', clip.y);
-    // CLIP_SLOT_GRID[clip.x][clip.y].call("fire");
-    // outlet(0, currentStepIndex.toString() + ' / ' + lastIndex.toString());
 }
 
 
@@ -110,9 +104,9 @@ function modifyAbeltonLiveGlobalParams(globalAbeltonEventsToTrigger) {
     globalAbeltonEventsToTrigger.map(function (obj) {
         var keyArray = Object.keys(obj);
         keyArray.map(function (param) {
-            LIVE_SET.set(param, obj[param])
-        })
-    })
+            LIVE_SET.set(param, obj[param]);
+        });
+    });
 }
 
 function modifyTracks(tracksToModifyArray) {
@@ -123,16 +117,16 @@ function modifyTracks(tracksToModifyArray) {
         // post('\n', trackModificationData.trackIndex);
         // post('\n', TRACK_ARRAY.length);
         var liveTrack = TRACK_ARRAY[trackModificationData.trackIndex];
-        if (trackModificationData.arm !== null) {
-            liveTrack.set('arm', trackModificationData.arm);
-        }
-        if (trackModificationData.solo !== null) {
-            liveTrack.set('solo', trackModificationData.solo);
-        }
-        post('\nmute: ', trackModificationData.mute, 'track: ', trackModificationData.trackIndex);
-        if (trackModificationData.mute !== null) {
-            liveTrack.set('mute', trackModificationData.mute);
-        }
+        var keyArray = Object.keys(trackModificationData);
+        keyArray.map(function (param) {
+            if(trackModificationData[param] === null
+                || param == 'instruments'
+                || param == 'effects'
+                || param == 'trackIndex') {
+                return
+            }
+            liveTrack.set(param, trackModificationData[param]);
+        });
     });
 }
 

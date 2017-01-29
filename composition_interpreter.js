@@ -41,12 +41,12 @@ var convertToLOMNotation = function(param, value) {
     }
     if (param == 'signature') {
         return {
-            signature_numerator: value[1],
+            signature_numerator: value[0],
             signature_denominator: value[1]
         }
     }
 
-    post('unknown Abelton Event:', param, 'with value', value);
+    post('ERR | unknown Abelton Event:', param, 'with value', value);
     return {};
 
 };
@@ -67,19 +67,18 @@ exports.getSceneToFire = function (triggers, SCENE_NAME_LOOKUP_ARRAY) {
     }
     if (typeof triggers.scene === 'string') {
         var filteredArray = SCENE_NAME_LOOKUP_ARRAY.filter(function (sceneInfo) {
-            post('\n', sceneInfo.name, triggers.scene);
             return sceneInfo.name == triggers.scene
         });
         if (filteredArray.length === 0) {
-            post('\n!!-- scene trigger ', triggers.scene, 'does not exist --!!')
+            post('\nERR | scene trigger ', triggers.scene, 'does not exist')
         } else if (filteredArray.length > 1) {
-            post('\n!! -- scene trigger ', triggers.scene, 'is declared more than once --!!')
+            post('\nERR | scene trigger ', triggers.scene, 'is declared more than once')
         }
 
         return parseInt(filteredArray[0].location);
     }
 
-    post('\nscene trigger ', triggers.scene, 'should be a number or string')
+    post('\nERR | scene trigger ', triggers.scene, 'should be a number or string')
 };
 
 /**
@@ -118,7 +117,6 @@ exports.getTrackModificationArray = function (triggers, TRACK_NAME_LOOKUP_ARRAY)
                 if (trackModifications.name == 'all') {
                     TRACK_NAME_LOOKUP_ARRAY.forEach(function(entry) {
                         var trackIndexToModify = entry.location;
-                        post('\ntrackmods ', trackModifications.mute);
                         trackModificationData.push(sanitizeTrackModificationData(trackIndexToModify, trackModifications));
                     })
                 } else {
@@ -202,10 +200,10 @@ var getTrackObjectIndexByName = function (name, TRACK_NAME_LOOKUP_ARRAY) {
         return obj.name == name
     });
     if (trackInfoObject.length > 1) {
-        post('\nYou have two tracks named ', name, ' and you should only have one....')
+        post('\nERR | You have two tracks named ', name, ' and you should only have one....')
     }
     if (trackInfoObject.length < 1) {
-        post('\nYou have no track named ', name, ' :-( ')
+        post('\nERR | You have no track named ', name, ' :-( ')
     }
     return trackInfoObject[0].location;
 };
@@ -247,7 +245,7 @@ var getCoordsOfClip = function (clip, RECORDED_CLIP_ARRAY) {
         if (clip.name) {
             var clipObject = getRecordedObjectByName(clip.name, RECORDED_CLIP_ARRAY);
             if (!clipObject) {
-                post('\n no clip nameed: ', clip.name);
+                post('\nERR | no clip nameed: ', clip.name);
             }
             var location = clipObject.location;
             return {
@@ -264,7 +262,7 @@ var getRecordedObjectByName = function (name, RECORDED_CLIP_ARRAY) {
     });
     if (clipInfoObjectArray.length > 1) {
         // Clip Names must be unique
-        post('\nYou have two clips named ', name, ' and you should only have one....')
+        post('\nERR | You have two clips named ', name, ' and you should only have one....')
     }
     return clipInfoObjectArray[0];
 };
