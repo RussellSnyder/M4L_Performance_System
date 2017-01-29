@@ -1,54 +1,79 @@
-exports.start = {
-    name: 'the Beginning 4 real nah',
-    triggers: {
-        clips: [
-            [0, 0],
-            {location: [2, 0]},
-            {location: [3, 0]},
-            {clipName: 'testclip'},
-            'anotherTest'
-        ]
+var sections = {
+    gravity: {
+        info: 'the Beginning 4 real nah',
+        triggers: {
+            clips: [
+                [0, 0],
+                {location: [1, 0]},
+                {location: [3, 0]},
+                {name: 'testclip'},
+                'anotherTest',
+                {name: 'turnMeOff'}
+            ]
+        }
+    },
+
+    transfer: {
+        info: 'The good part',
+        triggers: {
+            clips: [
+                [0, 1],
+                [1, 2],
+                {name: 'introSynth'},
+                'shockerSynth',
+                {
+                    off: [
+                        [0, 0],
+                        {name: 'turnMeOff'}
+                    ]
+                }
+            ]
+        }
+    },
+
+    legitRock: {
+        info: 'Slow Jam, do the duggy',
+        triggers: {
+            clips: [
+                [0, 1],
+                [1, 2],
+                {name: 'introSynth'},
+                'shockerSynth',
+                {
+                    off: [
+                        [0, 0],
+                        {name: 'turnMeOff'}
+                    ]
+                }
+            ]
+        }
+    },
+
+    skank: {
+        info: 'skank',
+        triggers: {
+            clips: [
+                [0, 0],
+                {location: [1, 0]},
+                {location: [3, 0]},
+                {name: 'testclip'},
+                'anotherTest',
+                {name: 'turnMeOff'}
+            ]
+        }
     }
 };
 
-exports.goodPart = {
-    name: 'The good part',
-    triggers: {
-        clips: [
-            [0, 1],
-            [1, 2],
-            [2, 3],
-            {location: [2, 4]},
-            {clipName: 'introSynth'},
-            'shockerSynth'
-        ]
-    }
-};
+exports.getSection = function (nameOfSection, extraInformation) {
+    var mySection = sections[nameOfSection];
 
-exports.slowJam = {
-    name: 'Slow Jam, do the duggy',
-    triggers: {
-        clips: [
-            [5, 4],
-            [4, 3],
-            [3, 2],
-            {location: [0, 0]},
-            {clipName: 'testClip'},
-            'anotherTest'
-        ]
+    if (!mySection) {
+        post('\n !!!-- no section named: ', nameOfSection + ' --!!')
     }
-};
 
-exports.theEnd = {
-    name: 'The end, what a great composition',
-    triggers: {
-        clips: [
-            [0, 0],
-            [1, 0],
-            [2, 0],
-            {location: [3, 1]},
-            {clipName: 'what?'},
-            'no'
-        ]
+    if (extraInformation) {
+        mySection.info = mySection.info + ': ' + extraInformation
     }
+
+    return mySection
 };

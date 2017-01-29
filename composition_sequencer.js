@@ -5,34 +5,34 @@ outlets = 2;
 
 
 var Composition = require('composition');
-var initializer = require('initializer');
+var Initializer = require('initializer');
+var CompositionInterpreter = require('composition_interpreter');
 
 var composition = Composition.getComposition();
+var ALL_CLIPS_IN_LIVE_SET = Initializer.initialize();
+
+CLIP_SLOT_GRID = ALL_CLIPS_IN_LIVE_SET.clip_slot_grid;
+RECORDED_CLIP_ARRAY = ALL_CLIPS_IN_LIVE_SET.recorded_clip_array;
+
+LAST_INDEX_OF_COMPOSITION = composition.length - 1;
+currentStepIndex = 0;
+firstStep = true;
+
 
 
 // Manually initilize
 function initialize() {
-    initializer.initialize();
+    ALL_CLIPS_IN_LIVE_SET = Initializer.initialize();
+    // Global Variables
+    CLIP_SLOT_GRID = ALL_CLIPS_IN_LIVE_SET.clip_slot_grid;
+    RECORDED_CLIP_ARRAY = ALL_CLIPS_IN_LIVE_SET.recorded_clip_array;
+    sendOutStepIndex(currentStepIndex, LAST_INDEX_OF_COMPOSITION);
+    sendOutStepInformation('intialized and ready to roll!');
 }
 
-initializer.initialize();
 
 
-// Global Variables
-CLIP_SLOT_GRID = initializer.CLIP_SLOT_GRID;
-RECORDED_CLIP_ARRAY = initializer.RECORDED_CLIP_ARRAY;
 
-lastIndex = composition.length - 1;
-stepIndex = 0;
-firstStep = true;
-
-// function reset() {
-//     stepIndex = 0;
-//     firstStep = true;
-//     outlet(0, 0 + ' / ' + lastIndex.toString());
-//     outlet(1, 'RESET');
-//
-// }
 
 
 function step(direction) {
@@ -42,110 +42,63 @@ function step(direction) {
         return;
     }
 
-    var tempIndex = stepIndex;
+    var tempIndex = currentStepIndex;
 
     if (tempIndex + direction < 0) {
         post('here');
         return;
-    } else if (tempIndex + direction > lastIndex) {
+    } else if (tempIndex + direction > LAST_INDEX_OF_COMPOSITION) {
         return;
     } else {
-        stepIndex = stepIndex + direction;
+        currentStepIndex = currentStepIndex + direction;
     }
 
     triggerStepInComposition(direction);
 
 }
 
-function triggerClipByName(name) {
-
-}
-
 
 function triggerStepInComposition(direction) {
-    var stepData = composition[stepIndex];
+    var stepData = composition[currentStepIndex];
+
     var triggers = stepData.triggers;
 
+    var clipsToFireCoords = CompositionInterpreter.getClipsToFireCoords(triggers, RECORDED_CLIP_ARRAY);
+    var clipsToStopCoords = CompositionInterpreter.getClipsToStopCoords(triggers, RECORDED_CLIP_ARRAY);
 
-    var clipCoords = [];
+    sendOutStepIndex(currentStepIndex, LAST_INDEX_OF_COMPOSITION);
+    sendOutStepInformation(stepData.info);
 
-    Object.keys(triggers).map(function (triggerType) {
-        if (triggerType === 'clips') {
-            clipCoords = triggers['clips'].map(function (clip) {
-                if (clip.constructor === Array) {
-                // just array of coords, no more info given
-                    return {
-                        x: clip[0],
-                        y: clip[1]
-                    }
-                } else if (typeof clip === 'string') {
-                    // just the name of the clip and no more info given
-                    var coords = RECORDED_CLIP_ARRAY[clip]['location'];
-                    // post('boom', coords[0]);
-                    return {
-                        x: coords[0],
-                        y: coords[1]
-                    }
-                } else if (typeof clip === 'object') {
-                    // a lot of info given about things....
-                    if (clip.location) {
-                        var coords = clip.location;
-                        return {
-                            x: coords[0],
-                            y: coords[1]
-                        }
-                    } else if (clip.clipName) {
-                        var location = RECORDED_CLIP_ARRAY[clip.clipName]['location'];
-                        // post('boom', coords[0]);
-                        return {
-                            x: location[0],
-                            y: location[1]
-                        }
-                    }
-                }
-            })
-        }
-    });
-
-
-    fireClips(clipCoords);
+    stopClips(clipsToStopCoords);
+    fireClips(clipsToFireCoords);
     // post('\n', triggers[0].name);
     // post('\n', clip.x);
     // post('\n', clip.y);
     // CLIP_SLOT_GRID[clip.x][clip.y].call("fire");
-    outlet(0, stepIndex.toString() + ' / ' + lastIndex.toString());
-    outlet(1, 'section: ' + stepData.name);
+    // outlet(0, currentStepIndex.toString() + ' / ' + lastIndex.toString());
 }
 
 
 function fireClips(clipCoords) {
-    // post(clipCoords[0].x);
-    // post('length', clipCoords.length);
+    if (clipCoords.length < 1) { return }
     clipCoords.map(function (clip) {
-        // post('\nclip x:', clip.x)
-        // post('\nclip y:', clip.y)
+        if (!clip) { return }
         CLIP_SLOT_GRID[clip.x][clip.y].call("fire");
+    });
+}
+
+function stopClips(clipCoords) {
+    if (clipCoords.length < 1) { return }
+    clipCoords.map(function (clip) {
+        if (!clip) { return }
+        CLIP_SLOT_GRID[clip.x][clip.y].call("stop");
     })
-    // for (i = 0; i < clipCoords.length; i++) {
-    //     CLIP_SLOT_GRID[clipCoords[i].x][clipCoords[i].y].call("fire");
-    // }
 }
 
-function getNameOfTrigger() {
-
+function sendOutStepIndex(current, last) {
+    outlet(0, current.toString() + ' / ' + last.toString());
 }
 
-// TODO take strings and trigger named clips
-function getClipCoords(clip) {
-    return {
-        x: clip[0],
-        y: clip[1],
-    }
+function sendOutStepInformation(info) {
+    outlet(1, info);
 }
-
-function fireClipSlot(x, y) {
-    CLIP_SLOT_GRID[x][y].call("fire");
-}
-
-/// we're just gonna initialize everything at the end so we don't have to keep clicking scan:
-// scan();
