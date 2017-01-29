@@ -1,7 +1,11 @@
 exports.initialize = function() {
     var myExports = {
         'clip_slot_grid': [],
-        'recorded_clip_array': []
+        'recorded_clip_array': [],
+        'scene_array': [],
+        'scene_name_lookup_array': [],
+        'track_array': [],
+        'track_name_lookup_array': []
     };
 
     var root = new LiveAPI(this.patcher, "live_set");
@@ -9,7 +13,23 @@ exports.initialize = function() {
     var num_tracks = root.getcount("tracks");
 
     for (x = 0; x < num_tracks; x++) {
+        var track = new LiveAPI(this.patcher, "live_set", "tracks", x)
+        myExports.track_array[x] = track;
+        myExports.track_name_lookup_array.push({
+            name: track.get('name'),
+            location: x
+        });
+
         myExports.clip_slot_grid[x] = [];
+    }
+
+    for (y = 0; y < num_scenes; y++) {
+        var scene = new LiveAPI(this.patcher, "live_set", "scenes", y);
+        myExports.scene_array[y] = scene;
+        myExports.scene_name_lookup_array.push({
+            name: scene.get('name'),
+            location: y
+        })
     }
 
     for (x = 0; x < num_tracks; x++) {

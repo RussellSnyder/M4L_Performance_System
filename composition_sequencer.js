@@ -14,6 +14,12 @@ var ALL_CLIPS_IN_LIVE_SET = Initializer.initialize();
 CLIP_SLOT_GRID = ALL_CLIPS_IN_LIVE_SET.clip_slot_grid;
 RECORDED_CLIP_ARRAY = ALL_CLIPS_IN_LIVE_SET.recorded_clip_array;
 
+SCENE_ARRAY = ALL_CLIPS_IN_LIVE_SET.scene_array;
+SCENE_NAME_LOOKUP_ARRAY = ALL_CLIPS_IN_LIVE_SET.scene_name_lookup_array;
+
+TRACK_ARRAY = ALL_CLIPS_IN_LIVE_SET.track_array;
+TRACK_NAME_LOOKUP_ARRAY = ALL_CLIPS_IN_LIVE_SET.track_name_lookup_array;
+
 LAST_INDEX_OF_COMPOSITION = composition.length - 1;
 currentStepIndex = 0;
 firstStep = true;
@@ -26,14 +32,15 @@ function initialize() {
     // Global Variables
     CLIP_SLOT_GRID = ALL_CLIPS_IN_LIVE_SET.clip_slot_grid;
     RECORDED_CLIP_ARRAY = ALL_CLIPS_IN_LIVE_SET.recorded_clip_array;
+
+    SCENE_ARRAY = ALL_CLIPS_IN_LIVE_SET.scene_array;
+    SCENE_NAME_LOOKUP_ARRAY = ALL_CLIPS_IN_LIVE_SET.scene_name_lookup_array;
+
+    TRACK_ARRAY = ALL_CLIPS_IN_LIVE_SET.track_array;
+    TRACK_NAME_LOOKUP_ARRAY = ALL_CLIPS_IN_LIVE_SET.track_name_lookup_array;
     sendOutStepIndex(currentStepIndex, LAST_INDEX_OF_COMPOSITION);
     sendOutStepInformation('intialized and ready to roll!');
 }
-
-
-
-
-
 
 function step(direction) {
     if (firstStep) {
@@ -65,10 +72,13 @@ function triggerStepInComposition(direction) {
 
     var clipsToFireCoords = CompositionInterpreter.getClipsToFireCoords(triggers, RECORDED_CLIP_ARRAY);
     var clipsToStopCoords = CompositionInterpreter.getClipsToStopCoords(triggers, RECORDED_CLIP_ARRAY);
+    var sceneToFire = CompositionInterpreter.getSceneToFire(triggers, SCENE_NAME_LOOKUP_ARRAY);
+    // var trackToModify = CompositionInterpreter.getSceneToFire(triggers, TRACK_NAME_LOOKUP_ARRAY);
 
     sendOutStepIndex(currentStepIndex, LAST_INDEX_OF_COMPOSITION);
     sendOutStepInformation(stepData.info);
 
+    fireScene(sceneToFire);
     stopClips(clipsToStopCoords);
     fireClips(clipsToFireCoords);
     // post('\n', triggers[0].name);
@@ -78,6 +88,11 @@ function triggerStepInComposition(direction) {
     // outlet(0, currentStepIndex.toString() + ' / ' + lastIndex.toString());
 }
 
+
+function fireScene(sceneNumber) {
+    if (!sceneNumber) { return }
+    SCENE_ARRAY[sceneNumber].call("fire");
+}
 
 function fireClips(clipCoords) {
     if (clipCoords.length < 1) { return }

@@ -1,3 +1,28 @@
+exports.getSceneToFire = function(triggers, SCENE_NAME_LOOKUP_ARRAY) {
+    if (!triggers.scene) {return null}
+
+    if (!isNaN(triggers.scene)) {
+        return parseInt(triggers.scene);
+    }
+    if (typeof triggers.scene === 'string') {
+        var filteredArray = SCENE_NAME_LOOKUP_ARRAY.filter(function (sceneInfo) {
+            post('\n', sceneInfo.name, triggers.scene);
+            return sceneInfo.name == triggers.scene
+        });
+        if (filteredArray.length === 0) {
+            post('\n!!-- scene trigger ', triggers.scene, 'does not exist --!!')
+        } else if (filteredArray.length > 1) {
+            post('\n!! -- scene trigger ', triggers.scene, 'is declared more than once --!!')
+        }
+
+        post(JSON.stringify(filteredArray[0]));
+
+        return parseInt(filteredArray[0].location);
+    }
+
+    post('\nscene trigger ', triggers.scene, 'should be a number or string')
+};
+
 exports.getClipsToFireCoords = function (triggers, RECORDED_CLIP_ARRAY) {
     var clipsToFireCoords = [];
 
