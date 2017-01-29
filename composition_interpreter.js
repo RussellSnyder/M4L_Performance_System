@@ -1,5 +1,7 @@
-exports.getSceneToFire = function(triggers, SCENE_NAME_LOOKUP_ARRAY) {
-    if (!triggers.scene) {return null}
+exports.getSceneToFire = function (triggers, SCENE_NAME_LOOKUP_ARRAY) {
+    if (!triggers.scene) {
+        return null
+    }
 
     if (!isNaN(triggers.scene)) {
         return parseInt(triggers.scene);
@@ -15,21 +17,99 @@ exports.getSceneToFire = function(triggers, SCENE_NAME_LOOKUP_ARRAY) {
             post('\n!! -- scene trigger ', triggers.scene, 'is declared more than once --!!')
         }
 
-        post(JSON.stringify(filteredArray[0]));
-
         return parseInt(filteredArray[0].location);
     }
 
     post('\nscene trigger ', triggers.scene, 'should be a number or string')
 };
 
+/**
+ *
+ * @param triggers
+ * @param TRACK_NAME_LOOKUP_ARRAY
+ * @returns {Array}
+ */
+// exports.getTracksToModifyIndexArray = function (triggers, TRACK_NAME_LOOKUP_ARRAY) {
+//     var trackData = [];
+//
+//     Object.keys(triggers).forEach(function (triggerType) {
+//         if (triggerType === 'tracks') {
+//             triggers['tracks'].forEach(function (trackModifications) {
+//                 var trackIndexToModify = getTrackObjectIndexByName(trackModifications.name, TRACK_NAME_LOOKUP_ARRAY);
+//                 trackData.push(trackIndexToModify);
+//             });
+//         }
+//     });
+//
+//     return trackData;
+// };
+
+/**
+ *
+ * @param triggers
+ * @param TRACK_NAME_LOOKUP_ARRAY
+ * @returns {Array}
+ */
+exports.getTrackModificationArray = function (triggers, TRACK_NAME_LOOKUP_ARRAY) {
+    var trackModificationData = [];
+
+    Object.keys(triggers).forEach(function (triggerType) {
+        if (triggerType === 'tracks') {
+            triggers['tracks'].forEach(function (trackModifications) {
+                if (trackModifications.name == 'all') {
+                    TRACK_NAME_LOOKUP_ARRAY.forEach(function(entry) {
+                        var trackIndexToModify = entry.location;
+                        post('\ntrackmods ', trackModifications.mute);
+                        trackModificationData.push(sanitizeTrackModificationData(trackIndexToModify, trackModifications));
+                    })
+                } else {
+                    var trackIndexToModify = getTrackObjectIndexByName(trackModifications.name, TRACK_NAME_LOOKUP_ARRAY);
+                    trackModificationData.push(sanitizeTrackModificationData(trackIndexToModify, trackModifications));
+                }
+            });
+        }
+    });
+
+    return trackModificationData;
+};
+
+var sanitizeTrackModificationData = function (trackIndexToModify, trackModifications) {
+    return {
+        trackIndex: trackIndexToModify,
+        arm: isOneOrZero(trackModifications.arm) ? trackModifications.arm : null,
+        mute: isOneOrZero(trackModifications.mute) ? trackModifications.mute : null,
+        solo: isOneOrZero(trackModifications.solo) ? trackModifications.solo : null,
+        instruments: !trackModifications.instruments
+            ? []
+            : trackModifications.instruments,
+        effects: !trackModifications.effects
+            ? []
+            : trackModifications.effects
+    }
+};
+
+var isOneOrZero = function(number) {
+    if (typeof number !== 'number') {
+        return false
+    }
+    if (number == 0 || number == 1) {
+        return true
+    }
+
+}
+/**
+ *
+ * @param triggers
+ * @param RECORDED_CLIP_ARRAY
+ * @returns {Array}
+ */
 exports.getClipsToFireCoords = function (triggers, RECORDED_CLIP_ARRAY) {
     var clipsToFireCoords = [];
 
     Object.keys(triggers).forEach(function (triggerType) {
         if (triggerType === 'clips') {
             triggers['clips'].forEach(function (clip) {
-                if(clip.off) {
+                if (clip.off) {
                     // the stop handler deals with these
                     return
                 }
@@ -46,7 +126,7 @@ exports.getClipsToStopCoords = function (triggers, RECORDED_CLIP_ARRAY) {
     Object.keys(triggers).forEach(function (triggerType) {
         if (triggerType === 'clips') {
             triggers['clips'].forEach(function (clipGroup) {
-                if(clipGroup.off) {
+                if (clipGroup.off) {
                     clipGroup.off.forEach(function (clip) {
                         clipsToStopCoords.push(getCoordsOfClip(clip, RECORDED_CLIP_ARRAY));
                     })
@@ -58,6 +138,26 @@ exports.getClipsToStopCoords = function (triggers, RECORDED_CLIP_ARRAY) {
     return clipsToStopCoords;
 };
 
+var getTrackObjectIndexByName = function (name, TRACK_NAME_LOOKUP_ARRAY) {
+    var trackInfoObject = TRACK_NAME_LOOKUP_ARRAY.filter(function (obj) {
+        return obj.name == name
+    });
+    if (trackInfoObject.length > 1) {
+        post('\nYou have two tracks named ', name, ' and you should only have one....')
+    }
+    if (trackInfoObject.length < 1) {
+        post('\nYou have no track named ', name, ' :-( ')
+    }
+    return trackInfoObject[0].location;
+};
+
+var getTrackNumber = function (trackNameOrNumber, TRACK_NAME_LOOKUP_ARRAY) {
+    if (!isNaN(trackNameOrNumber)) {
+        return parseInt(trackNameOrNumber);
+    }
+
+
+};
 
 var getCoordsOfClip = function (clip, RECORDED_CLIP_ARRAY) {
     if (clip.constructor === Array) {
@@ -99,8 +199,8 @@ var getCoordsOfClip = function (clip, RECORDED_CLIP_ARRAY) {
     }
 };
 
-var getRecordedObjectByName = function(name, RECORDED_CLIP_ARRAY) {
-    var clipInfoObjectArray = RECORDED_CLIP_ARRAY.filter(function(obj) {
+var getRecordedObjectByName = function (name, RECORDED_CLIP_ARRAY) {
+    var clipInfoObjectArray = RECORDED_CLIP_ARRAY.filter(function (obj) {
         return obj.name === name
     });
     if (clipInfoObjectArray.length > 1) {

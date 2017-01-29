@@ -10,7 +10,29 @@ var sections = {
             //     'anotherTest',
             //     {name: 'turnMeOff'}
             // ],
-            scene: 6
+            scene: 6,
+            tracks: [
+                {
+                    name: 'all',
+                    mute: 0
+                },
+                {
+                    name: 'track 3',
+                    mute: 0,
+                    instruments: [
+                        {
+                            name: 'test instrument',
+                            active: 1
+                        }
+                    ],
+                    effects: [
+                        {
+                            name: 'test effect',
+                            active: 1
+                        }
+                    ]
+                }
+            ]
         }
     },
 
@@ -29,7 +51,21 @@ var sections = {
             //         ]
             //     }
             // ],
-            scene: 'section2'
+            scene: 'section2',
+            tracks: [
+                {
+                    name: 'all',
+                    mute: 1
+                }
+                // {
+                //     name: 'track one',
+                //     mute: 1
+                // },
+                // {
+                //     name: 'track two',
+                //     solo: 1
+                // }
+            ]
         }
     },
 

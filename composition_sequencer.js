@@ -73,11 +73,13 @@ function triggerStepInComposition(direction) {
     var clipsToFireCoords = CompositionInterpreter.getClipsToFireCoords(triggers, RECORDED_CLIP_ARRAY);
     var clipsToStopCoords = CompositionInterpreter.getClipsToStopCoords(triggers, RECORDED_CLIP_ARRAY);
     var sceneToFire = CompositionInterpreter.getSceneToFire(triggers, SCENE_NAME_LOOKUP_ARRAY);
-    // var trackToModify = CompositionInterpreter.getSceneToFire(triggers, TRACK_NAME_LOOKUP_ARRAY);
+    var trackModifications = CompositionInterpreter.getTrackModificationArray(triggers, TRACK_NAME_LOOKUP_ARRAY);
+
 
     sendOutStepIndex(currentStepIndex, LAST_INDEX_OF_COMPOSITION);
     sendOutStepInformation(stepData.info);
 
+    modifyTracks(trackModifications);
     fireScene(sceneToFire);
     stopClips(clipsToStopCoords);
     fireClips(clipsToFireCoords);
@@ -92,6 +94,25 @@ function triggerStepInComposition(direction) {
 function fireScene(sceneNumber) {
     if (!sceneNumber) { return }
     SCENE_ARRAY[sceneNumber].call("fire");
+}
+
+function modifyTracks(tracksToModifyArray) {
+    if (tracksToModifyArray.length < 1) { return }
+    tracksToModifyArray.map(function(trackModificationData) {
+        // post('\n', trackModificationData.trackIndex);
+        // post('\n', TRACK_ARRAY.length);
+        var liveTrack = TRACK_ARRAY[trackModificationData.trackIndex];
+        if (trackModificationData.arm !== null) {
+            liveTrack.set('arm', trackModificationData.arm);
+        }
+        if (trackModificationData.solo !== null) {
+            liveTrack.set('solo', trackModificationData.solo);
+        }
+        post('\nmute: ', trackModificationData.mute, 'track: ', trackModificationData.trackIndex);
+        if (trackModificationData.mute !== null) {
+            liveTrack.set('mute', trackModificationData.mute);
+        }
+    });
 }
 
 function fireClips(clipCoords) {
